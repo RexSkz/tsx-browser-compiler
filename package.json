@@ -1,0 +1,37 @@
+{
+  "name": "tsx-browser-compiler",
+  "version": "1.0.0",
+  "description": "Transform a set of `.tsx` file into React element, extremely useful for the \"live edit\" feature in component library documents.",
+  "main": "dist/cjs/index.js",
+  "module": "dist/index.js",
+  "typings": "typings",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RexSkz/json-diff-kit.git"
+  },
+  "keywords": [
+    "tsx",
+    "react",
+    "compiler",
+    "browser"
+  ],
+  "author": "Rex Zeng <rex@rexskz.info>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/RexSkz/tsx-browser-compiler/issues"
+  },
+  "homepage": "https://github.com/RexSkz/tsx-browser-compiler#readme",
+  "dependencies": {
+    "@typescript/vfs": "^1.5.0",
+    "throttle-debounce": "^5.0.0",
+    "typescript": "^5.4.5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.77",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
