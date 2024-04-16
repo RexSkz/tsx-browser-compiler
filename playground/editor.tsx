@@ -32,6 +32,14 @@ const Editor: React.FC<EditorProps> = ({ className, sources, onSourceChange }) =
   };
 
   const renameTab = (index: number, newFileName: string) => {
+    if (sources.some(([filename], i) => filename === newFileName && i !== index)) {
+      alert(`File "${newFileName}" already exists!`);
+      return;
+    }
+    if (!newFileName) {
+      alert('File name cannot be empty!');
+      return;
+    }
     const newSources = [...sources];
     newSources[index][0] = newFileName;
     onSourceChange(newSources);
@@ -39,6 +47,10 @@ const Editor: React.FC<EditorProps> = ({ className, sources, onSourceChange }) =
   };
 
   const closeTab = (index: number) => {
+    const confirmClose = confirm(`Are you sure to close "${sources[index][0]}"?\nThis action cannot be undone!`);
+    if (!confirmClose) {
+      return;
+    }
     focusTab(index - 1);
     onSourceChange(sources.filter((_, i) => i !== index));
   };
