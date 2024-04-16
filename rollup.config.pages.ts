@@ -61,7 +61,7 @@ const plugins = [
       },
       target: 'es2020',
       loose: true,
-      keepClassNames: true
+      keepClassNames: true,
     },
   }),
   externalGlobals({

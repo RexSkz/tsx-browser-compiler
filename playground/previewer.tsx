@@ -1,11 +1,11 @@
 import React from 'react';
 
 class ErrorBoundary extends React.Component<React.PropsWithChildren> {
-  state = { error: null as Error | null };
-
   static getDerivedStateFromError(error: Error) {
     return { error };
   }
+
+  state = { error: null as Error | null };
 
   render() {
     if (this.state.error) {
@@ -31,7 +31,7 @@ const Previewer: React.FC<React.PropsWithChildren<PreviewerProps>> = ({
   const [key, setKey] = React.useState(0);
 
   React.useEffect(() => {
-    setKey(key + 1);
+    setKey(prev => prev + 1);
   }, [children]);
 
   return (

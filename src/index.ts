@@ -11,17 +11,19 @@ import type {
 export type * from './types';
 
 const codeToClosure = (code: string) => {
+  // Is there a better way to do this?
+  // eslint-disable-next-line no-eval
   return eval(`(require) => {
     const exports = {};
     ${code}
     return exports;
-  }`)
+  }`);
 };
 
 const allSourceCode = undefined;
 const errNoCode = new Error('No code found');
 
-export const asyncTsxToElement = async ({
+export const asyncTsxToElement = async({
   sources,
   entryFile = '/index.js',
   resolve,

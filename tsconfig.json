@@ -14,5 +14,5 @@
     "strictNullChecks": true,
     "target": "esnext",
   },
-  "include": ["src"],
+  "include": ["src", "playground", ".eslintrc.cjs", ".stylelintrc.js", "*.ts"],
 }

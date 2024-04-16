@@ -39,7 +39,7 @@ const Playground: React.FC = () => {
     }
   }, []);
 
-  useDebouncedEffect(async () => {
+  useDebouncedEffect(async() => {
     const { component, compiled, errors } = await asyncTsxToElement({
       sources: Object.fromEntries(sources),
     });
