@@ -1,7 +1,7 @@
 import {
   createSystem,
   createDefaultMapFromCDN,
-  createVirtualCompilerHost,
+  createVirtualTypeScriptEnvironment,
 } from '@typescript/vfs';
 import ts from 'typescript';
 
@@ -31,13 +31,8 @@ export const createFsMap = async(sources: Record<string, string>) => {
   return fsMap;
 };
 
-export const createTsProgram = (fsMap: Map<string, string>) => {
+export const createTsEnv = (fsMap: Map<string, string>) => {
+  const files = [...fsMap.keys()];
   const system = createSystem(fsMap);
-  const host = createVirtualCompilerHost(system, compilerOptions, ts);
-  const program = ts.createProgram({
-    rootNames: [...fsMap.keys()],
-    options: compilerOptions,
-    host: host.compilerHost,
-  });
-  return program;
+  return createVirtualTypeScriptEnvironment(system, files, ts, compilerOptions);
 };

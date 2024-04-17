@@ -49,9 +49,9 @@ const CompileResult: React.FC<CompileResultProps> = ({
       {
         errors.length ? (
           <div className={`${className}-error`}>
-            <pre><b>Error while resolving.</b></pre>
+            <pre><b>Error while compiling.</b></pre>
             {errors.map((error, index) => (
-              <pre key={index}>{error.stack}</pre>
+              <pre key={index}>{error.message}</pre>
             ))}
           </div>
         ) : null
