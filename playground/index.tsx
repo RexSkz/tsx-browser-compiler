@@ -10,21 +10,41 @@ import useDebouncedEffect from './use-debounced-effect';
 
 import './index.less';
 
-const defaultIndexTsx = `import React from 'react';
+const defaultCodeSet: [string, string][] = [
+  [
+    '/index.tsx',
+    `
+import React from 'react';
+import ForkMeOnGithub from 'fork-me-on-github';
+
+import { repo } from '/constants';
 
 export default () => {
+  const [count, setCount] = React.useState(0);
   return (
-    <div>
+    <div style={{ padding: '0 24px' }}>
       <h1>Hello, world!</h1>
+      <p>This is an example React App.</p>
+      <p>Repo URL: <a href={repo} target="_blank">{repo}</a></p>
+      <button onClick={() => setCount(count + 1)}>
+        You clicked me {count} time(s).
+      </button>
+      <ForkMeOnGithub repo={repo} />
     </div>
   );
-};
-`.trim();
+);
+`.trim(),
+  ],
+  [
+    '/constants.ts',
+    `export const repo = 'https://github.com/rexskz/tsx-browser-compiler';`,
+  ],
+];
 
 const localStorageKey = 'tsx-browser-compiler-playground-sources';
 
 const Playground: React.FC = () => {
-  const [sources, setSources] = React.useState<[string, string][]>([['/index.tsx', defaultIndexTsx]]);
+  const [sources, setSources] = React.useState<[string, string][]>(defaultCodeSet);
   const [layout, setLayout] = React.useState('horizontal');
   const [displayedChildren, setDisplayedChildren] = React.useState<React.ReactNode>(null);
   const [displayedCompiled, setDisplayedCompiled] = React.useState<[string, string][]>([]);
