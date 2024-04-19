@@ -14,6 +14,20 @@ const CompileResult: React.FC<CompileResultProps> = ({
 }) => {
   const [currentIndex, setCurrentIndex] = React.useState(0);
 
+  const code = result[currentIndex] ? result[currentIndex][1] : '// No result';
+  const [formattedCode, setFormattedCode] = React.useState(code);
+  React.useEffect(() => {
+    (window as any).prettier.format(code, {
+      parser: 'babel',
+      plugins: [
+        (window as any).prettierPlugins.estree,
+        (window as any).prettierPlugins.babel,
+      ],
+    }).then((formatted: string) => {
+      setFormattedCode(formatted);
+    });
+  }, [code]);
+
   return (
     <div className={className}>
       <div className={`${className}-tabs playground-tabs`}>
@@ -31,7 +45,7 @@ const CompileResult: React.FC<CompileResultProps> = ({
       </div>
       <Highlight
         theme={themes.oneLight}
-        code={result[currentIndex] ? result[currentIndex][1] : '// No result'}
+        code={formattedCode}
         language="tsx"
       >
         {({ style, tokens, getLineProps, getTokenProps }) => (

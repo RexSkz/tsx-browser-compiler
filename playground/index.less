@@ -276,6 +276,7 @@ input {
       flex-direction: column;
 
       & > pre {
+        overflow: auto;
         flex-grow: 1;
         padding: 8px;
         margin: 0;
@@ -293,6 +294,12 @@ input {
           background: transparent !important;
         }
       }
+    }
+
+    &-previewer {
+      position: relative;
+      overflow: auto;
+      background: #fff;
     }
 
     &-error-boundary {

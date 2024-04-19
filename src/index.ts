@@ -1,24 +1,10 @@
 import * as React from 'react';
 
-import { createRequireFn } from './resolving';
+import { codeToClosure, createClosureMap, createRequireFn, loadExternalsToClosureMap } from './resolving';
 import { createFsMap, createTsEnv } from './ts-vfs';
-import type {
-  Config,
-  ClosureFn,
-  ReturnValue,
-} from './types';
+import type { Config, ReturnValue } from './types';
 
 export type * from './types';
-
-const codeToClosure = (code: string) => {
-  // Is there a better way to do this?
-  // eslint-disable-next-line no-eval
-  return eval(`(require) => {
-    const exports = {};
-    ${code}
-    return exports;
-  }`);
-};
 
 const errNoCode = new Error('No code emitted.');
 const ignoredCode = [
@@ -36,7 +22,7 @@ export const asyncTsxToElement = async({
   const fsMap = await createFsMap(sources);
   const env = createTsEnv(fsMap);
   const codeMap: [string, string][] = [];
-  const closureMap: Record<string, ClosureFn> = {};
+  const closureMap = createClosureMap();
   const errors: Error[] = [];
   for (const filename of fsMap.keys()) {
     const emitOutput = env.languageService.getEmitOutput(filename);
@@ -81,7 +67,8 @@ export const asyncTsxToElement = async({
         errors,
       };
     }
-    const result = closure(createRequireFn(closureMap, resolve, requireFn));
+    await loadExternalsToClosureMap(resolve, closureMap);
+    const result = closure(createRequireFn(closureMap, requireFn, resolve?.extensions));
     result.default.displayName = displayName;
     return {
       component: React.createElement(result.default),

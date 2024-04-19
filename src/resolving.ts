@@ -5,32 +5,52 @@ import jsxRuntime from 'react/jsx-runtime';
 import type { ClosureFn, RequireFn, ResolveConfig } from './types';
 
 const emptyExport = {};
-const defaultExternalsMap = {
-  'react': React,
-  'react-dom': ReactDOM,
-  'react/jsx-runtime': jsxRuntime,
+
+export const createClosureMap = (): Record<string, ClosureFn> => {
+  const closureMap: Record<string, ClosureFn> = {
+    'react': () => React,
+    'react-dom': () => ReactDOM,
+    'react/jsx-runtime': () => jsxRuntime,
+  };
+  return closureMap;
+};
+
+export const codeToClosure = (code: string) => {
+  // Is there a better way to do this?
+  // eslint-disable-next-line no-eval
+  return eval(`(require) => {
+    const module = {};
+    const exports = {};
+    ${code}
+    return module.exports ?? exports;
+  }`);
+};
+
+const loadUMDModule = async(url: string) => {
+  const res = await fetch(url);
+  const code = await res.text();
+  return codeToClosure(code);
+};
+
+export const loadExternalsToClosureMap = async(
+  resolve: Partial<ResolveConfig> | undefined,
+  closureMap: Record<string, ClosureFn>,
+) => {
+  // TODO: parallelise
+  for (const [name, value] of Object.entries(resolve?.externals || {})) {
+    if (value.startsWith('http')) {
+      closureMap[name] = await loadUMDModule(value);
+    } else {
+      closureMap[name] = () => window[value];
+    }
+  }
 };
 
 export const createRequireFn = (
   closureMap: Record<string, ClosureFn | undefined>,
-  resolve: Partial<ResolveConfig> | undefined,
   requireFn: RequireFn | undefined,
+  extensions: string[] = ['.js'],
 ): RequireFn => {
-  const mergedResolve: ResolveConfig = {
-    extensions: ['.js'],
-    externals: {
-      'react': 'React',
-      'react-dom': 'ReactDOM',
-      'react/jsx-runtime': 'jsxRuntime',
-    },
-    ...resolve,
-  };
-
-  for (const key in mergedResolve.externals) {
-    const value = mergedResolve.externals[key];
-    closureMap[key] = () => window[value] ?? defaultExternalsMap[key] ?? emptyExport;
-  }
-
   const fn = (path: string) => {
     if (requireFn) {
       return requireFn(path);
@@ -40,7 +60,7 @@ export const createRequireFn = (
     }
     const tried: string[] = [path];
     let closure = closureMap[path];
-    for (const extension of mergedResolve.extensions) {
+    for (const extension of extensions) {
       if (closure) {
         break;
       }

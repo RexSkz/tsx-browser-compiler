@@ -42,6 +42,11 @@ const Playground: React.FC = () => {
   useDebouncedEffect(async() => {
     const { component, compiled, errors } = await asyncTsxToElement({
       sources: Object.fromEntries(sources),
+      resolve: {
+        externals: {
+          'fork-me-on-github': 'https://unpkg.com/fork-me-on-github@1.0.6/lib/index.js',
+        },
+      },
     });
     if (component !== null) {
       setDisplayedChildren(component);

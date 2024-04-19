@@ -31,6 +31,9 @@ const plugins = [
 <body>
   <div id="root"></div>
   <script src="https://www.unpkg.com/typescript@${ts.version}/lib/typescript.js"></script>
+  <script src="https://unpkg.com/prettier@3.2.5/standalone.js"></script>
+  <script src="https://unpkg.com/prettier@3.2.5/plugins/estree.js"></script>
+  <script src="https://unpkg.com/prettier@3.2.5/plugins/babel.js"></script>
   ${options?.files.js.map(({ fileName }) => `<script src="${fileName}"></script>`)}
 </body>
 </html>
