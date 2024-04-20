@@ -1,6 +1,6 @@
 import React from 'react';
 import { Highlight, themes } from 'prism-react-renderer';
-import FileName from './filename';
+import FileNameTab from './filename-tab';
 
 interface EditorProps {
 	className?: string;
@@ -47,6 +47,9 @@ const Editor: React.FC<EditorProps> = ({ className, sources, onSourceChange }) =
   };
 
   const closeTab = (index: number) => {
+    if (index === 0) {
+      return;
+    }
     const confirmClose = confirm(`Are you sure to close "${sources[index][0]}"?\nThis action cannot be undone!`);
     if (!confirmClose) {
       return;
@@ -65,7 +68,7 @@ const Editor: React.FC<EditorProps> = ({ className, sources, onSourceChange }) =
           +
         </button>
         {sources.map(([filename], index) => (
-          <FileName
+          <FileNameTab
             key={index}
             focusTab={focusTab}
             renameTab={renameTab}

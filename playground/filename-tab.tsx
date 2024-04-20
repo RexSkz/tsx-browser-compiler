@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface FileNameProps {
+interface FileNameTabProps {
 	focusTab: (index: number) => void;
 	renameTab: (index: number, newFileName: string) => void;
 	closeTab: (index: number) => void;
@@ -10,7 +10,7 @@ interface FileNameProps {
   className?: string;
 }
 
-const FileName: React.FC<FileNameProps> = ({
+const FileNameTab: React.FC<FileNameTabProps> = ({
   focusTab,
   renameTab,
   closeTab,
@@ -71,4 +71,4 @@ const FileName: React.FC<FileNameProps> = ({
   );
 };
 
-export default FileName;
+export default FileNameTab;

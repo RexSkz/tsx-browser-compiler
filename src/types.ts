@@ -1,12 +1,13 @@
 import type React from 'react';
 
-export type RequireFn = (path: string) => any;
+export type RequireFn = (absolutePath: string, curentFileName: string) => any;
 
 export type ClosureFn = (require: RequireFn) => any;
 
 export interface ResolveConfig {
   extensions: string[];
   externals: Record<string, string>;
+  cdnPrefix: string;
 };
 
 export interface Config {

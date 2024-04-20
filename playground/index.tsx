@@ -12,12 +12,12 @@ import './index.less';
 
 const defaultCodeSet: [string, string][] = [
   [
-    '/index.tsx',
+    'index.tsx',
     `
 import React from 'react';
 import ForkMeOnGithub from 'fork-me-on-github';
 
-import { repo } from '/constants';
+import { repo } from './constants';
 
 export default () => {
   const [count, setCount] = React.useState(0);
@@ -36,7 +36,7 @@ export default () => {
 `.trim(),
   ],
   [
-    '/constants.ts',
+    'constants.ts',
     `export const repo = 'https://github.com/rexskz/tsx-browser-compiler';`,
   ],
 ];
@@ -64,7 +64,7 @@ const Playground: React.FC = () => {
       sources: Object.fromEntries(sources),
       resolve: {
         externals: {
-          'fork-me-on-github': 'https://unpkg.com/fork-me-on-github@1.0.6/lib/index.js',
+          'fork-me-on-github': '1.0.6',
         },
       },
     });

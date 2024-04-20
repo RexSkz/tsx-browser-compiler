@@ -3,8 +3,21 @@ import * as ReactDOM from 'react-dom';
 import jsxRuntime from 'react/jsx-runtime';
 
 import type { ClosureFn, RequireFn, ResolveConfig } from './types';
+import { normalizePath } from './normalize-path';
 
 const emptyExport = {};
+
+export const mergeResolve = (resolve: Partial<ResolveConfig> | undefined = {}) => {
+  const mergedResolve: ResolveConfig = {
+    extensions: ['.js', ...(resolve.extensions || [])],
+    externals: {
+      ...resolve.externals,
+    },
+    cdnPrefix: 'https://unpkg.com',
+    ...resolve,
+  };
+  return mergedResolve;
+};
 
 export const createClosureMap = (): Record<string, ClosureFn> => {
   const closureMap: Record<string, ClosureFn> = {
@@ -15,10 +28,11 @@ export const createClosureMap = (): Record<string, ClosureFn> => {
   return closureMap;
 };
 
-export const codeToClosure = (code: string) => {
+export const codeToClosure = (code: string, fileName: string) => {
   // Is there a better way to do this?
   // eslint-disable-next-line no-eval
-  return eval(`(require) => {
+  return eval(`(_require) => {
+    const require = (path) => _require(path, '${fileName}');
     const module = {};
     const exports = {};
     ${code}
@@ -26,45 +40,34 @@ export const codeToClosure = (code: string) => {
   }`);
 };
 
-const loadUMDModule = async(url: string) => {
-  const res = await fetch(url);
-  const code = await res.text();
-  return codeToClosure(code);
-};
-
-export const loadExternalsToClosureMap = async(
-  resolve: Partial<ResolveConfig> | undefined,
-  closureMap: Record<string, ClosureFn>,
-) => {
-  // TODO: parallelise
-  for (const [name, value] of Object.entries(resolve?.externals || {})) {
-    if (value.startsWith('http')) {
-      closureMap[name] = await loadUMDModule(value);
-    } else {
-      closureMap[name] = () => window[value];
-    }
-  }
-};
-
 export const createRequireFn = (
   closureMap: Record<string, ClosureFn | undefined>,
   requireFn: RequireFn | undefined,
-  extensions: string[] = ['.js'],
+  resolve: ResolveConfig,
 ): RequireFn => {
-  const fn = (path: string) => {
+  const fn = (path: string, currentFileName: string) => {
+    path = normalizePath(path, currentFileName);
     if (requireFn) {
-      return requireFn(path);
+      return requireFn(path, currentFileName);
     }
     if (/\.(?:css|less|s[ac]ss|stylus)$/.test(path)) {
       return emptyExport;
     }
     const tried: string[] = [path];
     let closure = closureMap[path];
-    for (const extension of extensions) {
+    for (const extension of resolve.extensions) {
       if (closure) {
         break;
       }
       const pathWithExtension = `${path}${extension}`;
+      closure = closureMap[pathWithExtension];
+      tried.push(pathWithExtension);
+    }
+    for (const extension of resolve.extensions) {
+      if (closure) {
+        break;
+      }
+      const pathWithExtension = `${path}/index${extension}`;
       closure = closureMap[pathWithExtension];
       tried.push(pathWithExtension);
     }

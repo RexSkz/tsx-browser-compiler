@@ -1,6 +1,8 @@
 import * as React from 'react';
 
-import { codeToClosure, createClosureMap, createRequireFn, loadExternalsToClosureMap } from './resolving';
+import { loadExternalsToClosureMap } from './externals';
+import { normalizePath } from './normalize-path';
+import { codeToClosure, createClosureMap, createRequireFn, mergeResolve } from './resolving';
 import { createFsMap, createTsEnv } from './ts-vfs';
 import type { Config, ReturnValue } from './types';
 
@@ -19,7 +21,16 @@ export const asyncTsxToElement = async({
   requireFn,
   displayName = 'TsxToElement',
 }: Config): Promise<ReturnValue> => {
-  const fsMap = await createFsMap(sources);
+  const sourcesWithNormalizedPath = Object.entries(sources).reduce((acc, [key, value]) => {
+    if (!key.startsWith('/')) {
+      key = '/' + key;
+    }
+    key = normalizePath(key, '/index.js');
+    acc[key] = value;
+    return acc;
+  }, {} as Record<string, string>);
+  entryFile = normalizePath(entryFile, '/index.js');
+  const fsMap = await createFsMap(sourcesWithNormalizedPath);
   const env = createTsEnv(fsMap);
   const codeMap: [string, string][] = [];
   const closureMap = createClosureMap();
@@ -40,7 +51,7 @@ export const asyncTsxToElement = async({
       const filename = emitOutput.outputFiles[0].name;
       codeMap.push([filename, code]);
       try {
-        closureMap[filename] = codeToClosure(code);
+        closureMap[filename] = codeToClosure(code, filename);
       } catch (e) {
         e.message = `${filename}: ${e.message}`;
         errors.push(e);
@@ -67,8 +78,9 @@ export const asyncTsxToElement = async({
         errors,
       };
     }
-    await loadExternalsToClosureMap(resolve, closureMap);
-    const result = closure(createRequireFn(closureMap, requireFn, resolve?.extensions));
+    const mergedResolve = mergeResolve(resolve);
+    await loadExternalsToClosureMap(mergedResolve, closureMap);
+    const result = closure(createRequireFn(closureMap, requireFn, mergedResolve));
     result.default.displayName = displayName;
     return {
       component: React.createElement(result.default),
