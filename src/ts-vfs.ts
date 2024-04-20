@@ -6,6 +6,8 @@ import {
 import ts from 'typescript';
 
 const compilerOptions: ts.CompilerOptions = {
+  allowArbitraryExtensions: true,
+  allowNonTsExtensions: true,
   allowSyntheticDefaultImports: true,
   emitHelpers: false,
   esModuleInterop: true,
@@ -21,12 +23,10 @@ const compilerOptions: ts.CompilerOptions = {
 export const createFsMap = async(sources: Record<string, string>) => {
   const fsMap = await createDefaultMapFromCDN({ target: compilerOptions.target }, ts.version, true, ts);
   for (const filename in sources) {
-    if (/\.[jt]sx?$/.test(filename) || filename === '_') {
-      fsMap.set(
-        filename === '_' ? 'index.tsx' : filename,
-        sources[filename],
-      );
-    }
+    fsMap.set(
+      filename === '_' ? 'index.tsx' : filename,
+      sources[filename],
+    );
   }
   return fsMap;
 };

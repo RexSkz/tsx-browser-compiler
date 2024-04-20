@@ -38,7 +38,7 @@ const CompileResult: React.FC<CompileResultProps> = ({
               className={`playground-tabs-tab ${currentIndex === index ? 'playground-tabs-tab-active' : ''}`}
               onClick={() => setCurrentIndex(index)}
             >
-              {filename}
+              {filename.startsWith('/') ? filename.slice(1) : filename}
             </span>
           ))
         }

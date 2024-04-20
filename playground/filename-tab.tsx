@@ -54,6 +54,7 @@ const FileNameTab: React.FC<FileNameTabProps> = ({
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
+              e.preventDefault();
               renameTab(index, e.currentTarget.value);
               setEdit(false);
             }

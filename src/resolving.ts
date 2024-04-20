@@ -5,8 +5,6 @@ import jsxRuntime from 'react/jsx-runtime';
 import type { ClosureFn, RequireFn, ResolveConfig } from './types';
 import { normalizePath } from './normalize-path';
 
-const emptyExport = {};
-
 export const mergeResolve = (resolve: Partial<ResolveConfig> | undefined = {}) => {
   const mergedResolve: ResolveConfig = {
     extensions: ['.js', ...(resolve.extensions || [])],
@@ -49,9 +47,6 @@ export const createRequireFn = (
     path = normalizePath(path, currentFileName);
     if (requireFn) {
       return requireFn(path, currentFileName);
-    }
-    if (/\.(?:css|less|s[ac]ss|stylus)$/.test(path)) {
-      return emptyExport;
     }
     const tried: string[] = [path];
     let closure = closureMap[path];

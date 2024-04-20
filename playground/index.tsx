@@ -4,42 +4,12 @@ import ReactDOM from 'react-dom/client';
 import { asyncTsxToElement } from '../src';
 
 import CompileResult from './compile-result';
+import { defaultCodeSet } from './configs';
 import Editor from './editor';
 import Previewer from './previewer';
 import useDebouncedEffect from './use-debounced-effect';
 
 import './index.less';
-
-const defaultCodeSet: [string, string][] = [
-  [
-    'index.tsx',
-    `
-import React from 'react';
-import ForkMeOnGithub from 'fork-me-on-github';
-
-import { repo } from './constants';
-
-export default () => {
-  const [count, setCount] = React.useState(0);
-  return (
-    <div style={{ padding: '0 24px' }}>
-      <h1>Hello, world!</h1>
-      <p>This is an example React App.</p>
-      <p>Repo URL: <a href={repo} target="_blank">{repo}</a></p>
-      <button onClick={() => setCount(count + 1)}>
-        You clicked me {count} time(s).
-      </button>
-      <ForkMeOnGithub repo={repo} />
-    </div>
-  );
-);
-`.trim(),
-  ],
-  [
-    'constants.ts',
-    `export const repo = 'https://github.com/rexskz/tsx-browser-compiler';`,
-  ],
-];
 
 const localStorageKey = 'tsx-browser-compiler-playground-sources';
 
@@ -60,7 +30,7 @@ const Playground: React.FC = () => {
   }, []);
 
   useDebouncedEffect(async() => {
-    const { component, compiled, errors } = await asyncTsxToElement({
+    const { component, compiled, errors, cleanup } = await asyncTsxToElement({
       sources: Object.fromEntries(sources),
       resolve: {
         externals: {
@@ -77,6 +47,8 @@ const Playground: React.FC = () => {
       setDisplayedErrors(errors);
     }
     localStorage.setItem(localStorageKey, JSON.stringify(sources));
+
+    return cleanup;
   }, [sources], 1000);
 
   return (
@@ -84,6 +56,7 @@ const Playground: React.FC = () => {
       <div className="controls">
         <h1>TSX Browser Compiler</h1>
         <div>
+          <button onClick={() => setSources(defaultCodeSet)}>Reset demo</button>
           <label htmlFor="horizontal" className={layout === 'horizontal' ? 'checked' : ''}>
             <input type="radio"
               name="layout"

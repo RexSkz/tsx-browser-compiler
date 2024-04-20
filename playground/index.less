@@ -64,12 +64,28 @@ input {
       }
     }
 
+    button {
+      box-sizing: border-box;
+      margin-right: 8px;
+      padding: 0 4px;
+      height: 20px;
+      background: #fff;
+      border-radius: 4px;
+      border: 1px solid var(--playground-divider-color);
+      font-size: 12px;
+      vertical-align: middle;
+      cursor: pointer;
+
+      &:active {
+        background: #f0f0f0;
+      }
+    }
+
     label {
       position: relative;
       display: inline-flex;
       align-items: center;
       padding: 4px 8px;
-      cursor: pointer;
       font-size: 12px;
 
       input {
@@ -83,9 +99,11 @@ input {
         margin: 0 4px 0 0;
         appearance: none;
         background: #fff;
+        cursor: pointer;
 
         & + span {
           z-index: 1;
+          cursor: pointer;
         }
       }
 

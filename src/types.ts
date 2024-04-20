@@ -23,4 +23,5 @@ export interface ReturnValue {
   defaultExport: any;
   compiled: [string, string][];
   errors: Error[];
+  cleanup: () => void;
 }
