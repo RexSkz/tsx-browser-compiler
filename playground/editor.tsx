@@ -14,8 +14,20 @@ const Editor: React.FC<EditorProps> = ({ className, sources, onSourceChange }) =
   const newFileIndex = React.useRef(0);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
-  const focusTab = (index: number) => {
+  const focusTab = () => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+      setTimeout(() => textareaRef.current?.setSelectionRange(0, 0));
+    }
+  };
+
+  React.useEffect(() => {
+    focusTab();
+  }, []);
+
+  const switchToTab = (index: number) => {
     setCurrentIndex(index);
+    focusTab();
   };
 
   const addTab = () => {
@@ -28,7 +40,7 @@ const Editor: React.FC<EditorProps> = ({ className, sources, onSourceChange }) =
       newFileName = `/new-file-${newFileIndex.current++}.tsx`;
     }
     onSourceChange([...sources, [newFileName, '']]);
-    focusTab(sources.length);
+    switchToTab(sources.length);
   };
 
   const renameTab = (index: number, newFileName: string) => {
@@ -43,7 +55,7 @@ const Editor: React.FC<EditorProps> = ({ className, sources, onSourceChange }) =
     const newSources = [...sources];
     newSources[index][0] = newFileName;
     onSourceChange(newSources);
-    focusTab(index);
+    switchToTab(index);
   };
 
   const closeTab = (index: number) => {
@@ -54,8 +66,29 @@ const Editor: React.FC<EditorProps> = ({ className, sources, onSourceChange }) =
     if (!confirmClose) {
       return;
     }
-    focusTab(index - 1);
+    switchToTab(index - 1);
     onSourceChange(sources.filter((_, i) => i !== index));
+  };
+
+  const onEditorKeyDown: React.KeyboardEventHandler<HTMLTextAreaElement> = e => {
+    if (e.key === 'Home') {
+      e.preventDefault();
+      const el = e.currentTarget;
+      if (e.ctrlKey) {
+        el.setSelectionRange(0, 0);
+      } else {
+        const currentPosition = el.selectionStart;
+        const isSelection = el.selectionEnd !== currentPosition;
+        const lineStart = currentCode.lastIndexOf('\n', currentPosition - 1) + 1;
+        const firstNonSpace = Math.max(currentCode.slice(lineStart, currentPosition + 1).search(/\S/), 0) + lineStart;
+        const targetPosition = currentPosition === firstNonSpace ? lineStart : firstNonSpace;
+        if (e.shiftKey) {
+          el.setSelectionRange(targetPosition, isSelection ? el.selectionEnd : currentPosition, 'backward');
+        } else {
+          el.setSelectionRange(targetPosition, targetPosition, 'backward');
+        }
+      }
+    }
   };
 
   return (
@@ -70,7 +103,7 @@ const Editor: React.FC<EditorProps> = ({ className, sources, onSourceChange }) =
         {sources.map(([filename], index) => (
           <FileNameTab
             key={index}
-            focusTab={focusTab}
+            switchToTab={switchToTab}
             renameTab={renameTab}
             closeTab={closeTab}
             filename={filename}
@@ -89,6 +122,16 @@ const Editor: React.FC<EditorProps> = ({ className, sources, onSourceChange }) =
               </div>
             )
           }
+          <textarea
+            ref={textareaRef}
+            value={currentCode}
+            onChange={(e) => {
+              const newSources = [...sources];
+              newSources[currentIndex][1] = e.target.value;
+              onSourceChange(newSources);
+            }}
+            onKeyDown={onEditorKeyDown}
+          />
           <Highlight theme={themes.oneLight} code={currentCode} language="tsx">
             {({ style, tokens, getLineProps, getTokenProps }) => (
               <pre style={style}>
@@ -102,15 +145,6 @@ const Editor: React.FC<EditorProps> = ({ className, sources, onSourceChange }) =
               </pre>
             )}
           </Highlight>
-          <textarea
-            ref={textareaRef}
-            value={currentCode}
-            onChange={(e) => {
-              const newSources = [...sources];
-              newSources[currentIndex][1] = e.target.value;
-              onSourceChange(newSources);
-            }}
-          />
         </div>
       </div>
     </div>

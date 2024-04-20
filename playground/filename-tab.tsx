@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface FileNameTabProps {
-	focusTab: (index: number) => void;
+	switchToTab: (index: number) => void;
 	renameTab: (index: number, newFileName: string) => void;
 	closeTab: (index: number) => void;
 	filename: string;
@@ -11,7 +11,7 @@ interface FileNameTabProps {
 }
 
 const FileNameTab: React.FC<FileNameTabProps> = ({
-  focusTab,
+  switchToTab: focusTab,
   renameTab,
   closeTab,
   filename,

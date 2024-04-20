@@ -1,3 +1,14 @@
+:root {
+  --playground-background: #f2f4f6;
+  --playground-code-background: #fafcff;
+  --playground-divider-color: #e2e4e6;
+  --playground-controls-height: 32px;
+  --playground-tabs-height: 32px;
+  --playground-tabs-tab-active-border-color: #3ae;
+  --playground-close-icon-height: 16px;
+  --playground-code-selection-color: #b5bbc6;
+}
+
 html,
 body {
   margin: 0;
@@ -18,14 +29,6 @@ input {
 }
 
 .app {
-  --playground-background: #f2f4f6;
-  --playground-code-background: #fafcff;
-  --playground-divider-color: #e2e4e6;
-  --playground-controls-height: 32px;
-  --playground-tabs-height: 32px;
-  --playground-tabs-tab-active-border-color: #3ae;
-  --playground-close-icon-height: 16px;
-
   display: flex;
   height: 100vh;
   flex-direction: column;
@@ -254,6 +257,17 @@ input {
             outline: none;
             resize: none;
             -webkit-text-fill-color: transparent;
+
+            &::selection {
+              background: var(--playground-code-selection-color);
+            }
+          }
+
+          pre {
+            position: relative;
+            z-index: 1;
+            background: transparent !important;
+            pointer-events: none;
           }
         }
 
