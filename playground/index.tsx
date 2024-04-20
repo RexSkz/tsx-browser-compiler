@@ -3,11 +3,11 @@ import ReactDOM from 'react-dom/client';
 
 import { asyncTsxToElement } from '../src';
 
-import CompileResult from './compile-result';
+import CompileResult from './components/compile-result';
 import { defaultCodeSet } from './configs';
-import Editor from './editor';
-import Previewer from './previewer';
-import useDebouncedEffect from './use-debounced-effect';
+import Editor from './components/editor';
+import Previewer from './components/previewer';
+import useDebouncedEffect from './hooks/use-debounced-effect';
 
 import './index.less';
 
@@ -37,6 +37,30 @@ const Playground: React.FC = () => {
           'fork-me-on-github': '1.0.6',
         },
       },
+      rules: [
+        {
+          test: /\.less$/,
+          use: [
+            (content, meta, callback) => {
+              (window as any).less.render(
+                content,
+                {
+                  filename: meta.filename,
+                  minimize: true,
+                },
+                (err: Error, result: { css: string }) => {
+                  if (err) {
+                    err.message = `${meta.filename}: ${err.message}`;
+                    callback(err, '', meta);
+                  } else {
+                    callback(null, result.css, meta);
+                  }
+                },
+              );
+            },
+          ],
+        },
+      ],
     });
     if (component !== null) {
       setDisplayedChildren(component);

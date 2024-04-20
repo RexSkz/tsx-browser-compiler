@@ -1,5 +1,9 @@
 import React from 'react';
 import { Highlight, themes } from 'prism-react-renderer';
+
+import getHighlightLanguage from '../utils/get-highlight-language';
+import usePreferColorScheme from '../hooks/use-prefer-color-scheme';
+
 import FileNameTab from './filename-tab';
 
 interface EditorProps {
@@ -10,6 +14,7 @@ interface EditorProps {
 
 const Editor: React.FC<EditorProps> = ({ className, sources, onSourceChange }) => {
   const [currentIndex, setCurrentIndex] = React.useState(0);
+  const currentFilename = sources[currentIndex]?.[0] ?? '';
   const currentCode = (sources[currentIndex] ?? sources[0])[1];
   const newFileIndex = React.useRef(0);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
@@ -91,6 +96,8 @@ const Editor: React.FC<EditorProps> = ({ className, sources, onSourceChange }) =
     }
   };
 
+  const preferColorScheme = usePreferColorScheme();
+
   return (
     <div className={className}>
       <div
@@ -132,7 +139,11 @@ const Editor: React.FC<EditorProps> = ({ className, sources, onSourceChange }) =
             }}
             onKeyDown={onEditorKeyDown}
           />
-          <Highlight theme={themes.oneLight} code={currentCode} language="tsx">
+          <Highlight
+            theme={preferColorScheme === 'light' ? themes.oneLight : themes.vsDark}
+            code={currentCode}
+            language={getHighlightLanguage(currentFilename)}
+          >
             {({ style, tokens, getLineProps, getTokenProps }) => (
               <pre style={style}>
                 {tokens.map((line, i) => (

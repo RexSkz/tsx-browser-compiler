@@ -1,6 +1,9 @@
 import React from 'react';
 import { Highlight, themes } from 'prism-react-renderer';
 
+import getHighlightLanguage from '../utils/get-highlight-language';
+import usePreferColorScheme from '../hooks/use-prefer-color-scheme';
+
 interface CompileResultProps {
   className?: string;
   result: [string, string][];
@@ -14,6 +17,7 @@ const CompileResult: React.FC<CompileResultProps> = ({
 }) => {
   const [currentIndex, setCurrentIndex] = React.useState(0);
 
+  const currentFilename = result[currentIndex]?.[0] ?? '';
   const code = result[currentIndex] ? result[currentIndex][1] : '// No result';
   const [formattedCode, setFormattedCode] = React.useState(code);
   React.useEffect(() => {
@@ -27,6 +31,8 @@ const CompileResult: React.FC<CompileResultProps> = ({
       setFormattedCode(formatted);
     });
   }, [code]);
+
+  const preferColorScheme = usePreferColorScheme();
 
   return (
     <div className={className}>
@@ -44,9 +50,9 @@ const CompileResult: React.FC<CompileResultProps> = ({
         }
       </div>
       <Highlight
-        theme={themes.oneLight}
+        theme={preferColorScheme === 'light' ? themes.oneLight : themes.vsDark}
         code={formattedCode}
-        language="tsx"
+        language={getHighlightLanguage(currentFilename)}
       >
         {({ style, tokens, getLineProps, getTokenProps }) => (
           <pre style={style}>

@@ -2,7 +2,8 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import jsxRuntime from 'react/jsx-runtime';
 
-import type { ClosureFn, RequireFn, ResolveConfig } from './types';
+import type { ClosureFn, RequireFn, ResolveConfig } from '../types';
+
 import { normalizePath } from './normalize-path';
 
 export const mergeResolve = (resolve: Partial<ResolveConfig> | undefined = {}) => {
@@ -67,7 +68,7 @@ export const createRequireFn = (
       tried.push(pathWithExtension);
     }
     if (!closure) {
-      throw new Error(`Cannot find module '${path}' (tried ${tried.join(', ')})`);
+      throw new Error(`${currentFileName}: Cannot find module '${path}' (tried ${tried.join(', ')})`);
     }
     return closure(fn);
   };

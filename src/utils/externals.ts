@@ -1,5 +1,6 @@
+import type { ClosureFn, ResolveConfig } from '../types';
+
 import { codeToClosure } from './resolving';
-import type { ClosureFn, ResolveConfig } from './types';
 
 const loadUMDModule = async(url: string) => {
   const res = await fetch(url);

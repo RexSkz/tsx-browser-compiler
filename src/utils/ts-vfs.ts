@@ -15,6 +15,7 @@ const compilerOptions: ts.CompilerOptions = {
   module: ts.ModuleKind.CommonJS,
   noEmitOnError: false,
   outDir: '/',
+  resolveJsonModule: true,
   skipLibCheck: true,
   skipDefaultLibCheck: true,
   target: ts.ScriptTarget.ES2020,

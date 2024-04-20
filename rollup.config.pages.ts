@@ -29,11 +29,20 @@ const plugins = [
   <meta charset="utf-8" />
 </head>
 <body>
+  <script>
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.body.setAttribute('data-theme', 'dark');
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+      document.body.setAttribute('data-theme', event.matches ? 'dark' : 'light');
+    });
+  </script>
   <div id="root"></div>
   <script src="https://www.unpkg.com/typescript@${ts.version}/lib/typescript.js"></script>
   <script src="https://unpkg.com/prettier@3.2.5/standalone.js"></script>
   <script src="https://unpkg.com/prettier@3.2.5/plugins/estree.js"></script>
   <script src="https://unpkg.com/prettier@3.2.5/plugins/babel.js"></script>
+  <script src="https://unpkg.com/less@4.2.0/dist/less.js"></script>
   ${options?.files.js.map(({ fileName }) => `<script src="${fileName}"></script>`)}
 </body>
 </html>

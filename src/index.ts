@@ -1,9 +1,10 @@
 import * as React from 'react';
 
-import { loadExternalsToClosureMap } from './externals';
-import { normalizePath } from './normalize-path';
-import { codeToClosure, createClosureMap, createRequireFn, mergeResolve } from './resolving';
-import { createFsMap, createTsEnv } from './ts-vfs';
+import { loadExternalsToClosureMap } from './utils/externals';
+import { normalizePath } from './utils/normalize-path';
+import { codeToClosure, createClosureMap, createRequireFn, mergeResolve } from './utils/resolving';
+import { applyRules } from './utils/rules';
+import { createFsMap, createTsEnv } from './utils/ts-vfs';
 import type { Config, ReturnValue } from './types';
 
 export type * from './types';
@@ -15,6 +16,10 @@ const ignoredCode = [
   7026,
 ];
 
+const cssRe = /\.(?:c|le|sa|sc)ss|stylus$/i;
+const jsRe = /\.m?[jt]sx?$/i;
+const jsonRe = /\.json$/i;
+
 const noop = () => { };
 
 export const asyncTsxToElement = async({
@@ -22,46 +27,52 @@ export const asyncTsxToElement = async({
   entryFile = '/index.js',
   resolve,
   requireFn,
+  rules = [],
   displayName = 'TsxToElement',
 }: Config): Promise<ReturnValue> => {
   const codeMap: [string, string][] = [];
   const closureMap = createClosureMap();
   const cleanupFiles: string[] = [];
-  const parsedSources = Object.entries(sources).reduce((acc, [key, value]) => {
-    if (!key.startsWith('/')) {
-      key = '/' + key;
+  const errors: Error[] = [];
+  const parsedSources = Object.entries(sources).reduce((acc, [_filename, _content]) => {
+    if (!_filename.startsWith('/')) {
+      _filename = '/' + _filename;
     }
-    key = normalizePath(key, '/index.js');
-    if (/\.[jt]sx?$/.test(key)) {
-      acc[key] = value;
-    } else if (/\.(c|le)ss$/.test(key)) {
+    const filename = normalizePath(_filename, '/index.js');
+    const { content, error } = applyRules(rules, filename, _content);
+    if (error) {
+      errors.push(error);
+      return acc;
+    }
+    if (jsRe.test(filename)) {
+      acc[filename] = content;
+    } else {
       // Types for non-ts files, see:
       // https://www.typescriptlang.org/tsconfig#allowArbitraryExtensions
-      acc[`${key}.d.ts`] = `declare const result: any;\nexport default result;`;
-      acc[key] = `
-// @ts-nocheck
-const styleString = \`${value.trim()}\`;
-const existed = document.head.querySelector('style[data-tsx-browser-compiler-filename="${key}"]');
-if (existed) {
-  existed.textContent = styleString;
-  return;
+      acc[`${filename}.d.ts`] = `declare const result: any;\nexport default result;`;
+      if (jsonRe.test(filename)) {
+        acc[`${filename}.js`] = `export default ${content};`;
+      } else if (cssRe.test(filename)) {
+        acc[filename] = `
+const s = \`${content.trim()}\`;
+let el = document.head.querySelector('style[data-tsx-browser-compiler-filename="${filename}"]');
+if (!el) {
+  el = document.createElement('style');
+  el.setAttribute('data-tsx-browser-compiler-filename', '${filename}');
+  document.head.appendChild(el);
 }
-const style = document.createElement('style');
-style.setAttribute('data-tsx-browser-compiler-filename', '${key}');
-style.textContent = styleString;
-document.head.appendChild(style);
-      `;
-      cleanupFiles.push(key);
-    } else {
-      // eslint-disable-next-line no-console
-      console.error(`Unsupported file type: ${key}.`);
-      acc[key] = value;
+el.textContent = s;
+        `;
+        cleanupFiles.push(filename);
+      } else {
+        errors.push(new Error(`${filename}: you may need a custom rule for this file type.`));
+        acc[filename] = content;
+      }
     }
     return acc;
   }, {} as Record<string, string>);
   const fsMap = await createFsMap(parsedSources);
   const env = createTsEnv(fsMap);
-  const errors: Error[] = [];
   for (const filename of fsMap.keys()) {
     const emitOutput = env.languageService.getEmitOutput(filename);
     if (!emitOutput) {
