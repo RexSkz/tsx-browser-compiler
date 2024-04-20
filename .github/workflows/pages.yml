@@ -1,0 +1,25 @@
+name: GitHub Pages
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: |
+          git config user.name "Rex Zeng"
+          git config user.email "rex@rexskz.info"
+          git checkout -b gh-pages
+          npm install -g pnpm@8
+          pnpm i
+          pnpm build:pages
+          git add docs -f
+          git commit -m Pages
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push -f origin gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_token }}
