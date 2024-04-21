@@ -1,6 +1,6 @@
 {
   "name": "tsx-browser-compiler",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "description": "Transform a set of `.tsx` file into React element, extremely useful for the \"live edit\" feature in component library documents.",
   "main": "dist/cjs/index.js",
   "module": "dist/index.js",
