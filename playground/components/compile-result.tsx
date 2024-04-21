@@ -8,19 +8,24 @@ interface CompileResultProps {
   className?: string;
   result: [string, string][];
   errors: Error[];
+  loading: boolean;
 }
 
 const CompileResult: React.FC<CompileResultProps> = ({
   className,
   result,
   errors,
+  loading,
 }) => {
   const [currentIndex, setCurrentIndex] = React.useState(0);
 
   const currentFilename = result[currentIndex]?.[0] ?? '';
-  const code = result[currentIndex] ? result[currentIndex][1] : '// No result';
+  const code = result[currentIndex] ? result[currentIndex][1] : '';
   const [formattedCode, setFormattedCode] = React.useState(code);
   React.useEffect(() => {
+    if (!code) {
+      return;
+    }
     (window as any).prettier.format(code, {
       parser: 'babel',
       plugins: [
@@ -37,6 +42,7 @@ const CompileResult: React.FC<CompileResultProps> = ({
   return (
     <div className={className}>
       <div className={`${className}-tabs playground-tabs`}>
+        {result.length ? null : <div className="playground-tabs-tab">No file</div>}
         {
           result.map(([filename], index) => (
             <span
@@ -49,6 +55,7 @@ const CompileResult: React.FC<CompileResultProps> = ({
           ))
         }
       </div>
+      {loading ? <div className={`${className}-loading`}>Compiling...</div> : null}
       <Highlight
         theme={preferColorScheme === 'light' ? themes.oneLight : themes.vsDark}
         code={formattedCode}

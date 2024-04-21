@@ -12,18 +12,24 @@ export interface ResolveConfig {
 
 export interface LoaderMeta {
   filename: string;
+  options: Record<string, unknown>;
+  [key: string]: unknown;
 };
 
 export type LoaderCallback = (err: Error | null, content: string, meta: LoaderMeta) => void;
 
 export interface LoaderFn {
   (content: string, meta: LoaderMeta, cb: LoaderCallback): void;
-  // Do we need "pitch" here?
+  pitch?: (content: string, meta: LoaderMeta, cb: LoaderCallback) => void;
 }
 
 export interface ModuleRule {
   test: RegExp;
-  use: LoaderFn[];
+  use: (LoaderFn | {
+    loader: LoaderFn;
+    options?: Record<string, unknown>;
+  })[];
+  enforce?: 'pre' | 'post';
 }
 
 export interface Config {

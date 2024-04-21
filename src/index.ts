@@ -3,9 +3,9 @@ import * as React from 'react';
 import { loadExternalsToClosureMap } from './utils/externals';
 import { normalizePath } from './utils/normalize-path';
 import { codeToClosure, createClosureMap, createRequireFn, mergeResolve } from './utils/resolving';
-import { applyRules } from './utils/rules';
 import { createFsMap, createTsEnv } from './utils/ts-vfs';
 import type { Config, ReturnValue } from './types';
+import { parseSources } from './utils/loaders';
 
 export type * from './types';
 
@@ -15,10 +15,6 @@ const ignoredCode = [
   6054,
   7026,
 ];
-
-const cssRe = /\.(?:c|le|sa|sc)ss|stylus$/i;
-const jsRe = /\.m?[jt]sx?$/i;
-const jsonRe = /\.json$/i;
 
 const noop = () => { };
 
@@ -32,45 +28,8 @@ export const asyncTsxToElement = async({
 }: Config): Promise<ReturnValue> => {
   const codeMap: [string, string][] = [];
   const closureMap = createClosureMap();
-  const cleanupFiles: string[] = [];
   const errors: Error[] = [];
-  const parsedSources = Object.entries(sources).reduce((acc, [_filename, _content]) => {
-    if (!_filename.startsWith('/')) {
-      _filename = '/' + _filename;
-    }
-    const filename = normalizePath(_filename, '/index.js');
-    const { content, error } = applyRules(rules, filename, _content);
-    if (error) {
-      errors.push(error);
-      return acc;
-    }
-    if (jsRe.test(filename)) {
-      acc[filename] = content;
-    } else {
-      // Types for non-ts files, see:
-      // https://www.typescriptlang.org/tsconfig#allowArbitraryExtensions
-      acc[`${filename}.d.ts`] = `declare const result: any;\nexport default result;`;
-      if (jsonRe.test(filename)) {
-        acc[`${filename}.js`] = `export default ${content};`;
-      } else if (cssRe.test(filename)) {
-        acc[filename] = `
-const s = \`${content.trim()}\`;
-let el = document.head.querySelector('style[data-tsx-browser-compiler-filename="${filename}"]');
-if (!el) {
-  el = document.createElement('style');
-  el.setAttribute('data-tsx-browser-compiler-filename', '${filename}');
-  document.head.appendChild(el);
-}
-el.textContent = s;
-        `;
-        cleanupFiles.push(filename);
-      } else {
-        errors.push(new Error(`${filename}: you may need a custom rule for this file type.`));
-        acc[filename] = content;
-      }
-    }
-    return acc;
-  }, {} as Record<string, string>);
+  const { parsedSources, cleanupFiles } = parseSources(sources, rules, errors);
   const fsMap = await createFsMap(parsedSources);
   const env = createTsEnv(fsMap);
   for (const filename of fsMap.keys()) {

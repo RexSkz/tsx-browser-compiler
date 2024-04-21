@@ -10,6 +10,7 @@
   --playground-tabs-tab-active-border-color: #3ae;
   --playground-close-icon-height: 16px;
   --playground-code-selection-color: #b5bbc6;
+  --playground-link-color: blue;
 }
 
 html,
@@ -27,6 +28,7 @@ body[data-theme='dark'] {
   --playground-tabs-tab-active-border-color: #3ae;
   --playground-close-icon-height: 16px;
   --playground-code-selection-color: #444;
+  --playground-link-color: #3ae;
 }
 
 body,
@@ -41,6 +43,10 @@ input {
     'Microsoft YaHei UI',
     'WenQuanYi Micro Hei',
     sans-serif;
+}
+
+a {
+  color: var(--playground-link-color);
 }
 
 .app {
@@ -250,8 +256,10 @@ input {
           cursor: pointer;
           line-height: var(--playground-close-icon-height);
 
-          &:not(&-disabled):hover {
+          &:not(&-disabled):hover,
+          &:not(&-disabled):focus {
             background: var(--playground-button-hover-background);
+            outline: none;
           }
         }
 
@@ -332,6 +340,28 @@ input {
       display: flex;
       flex-direction: column;
       color: var(--playground-text-color);
+      position: relative;
+      overflow: hidden;
+
+      @keyframes loading-show {
+        0% {
+          transform: translateY(100%);
+        }
+        100% {
+          transform: translateY(0);
+        }
+      }
+
+      &-loading {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        padding: 8px 16px;
+        background: var(--playground-tabs-tab-active-border-color);
+        color: #fff;
+        animation: loading-show 0.5s ease-out forwards;
+      }
 
       & > pre {
         overflow: auto;

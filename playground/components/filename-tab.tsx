@@ -11,7 +11,7 @@ interface FileNameTabProps {
 }
 
 const FileNameTab: React.FC<FileNameTabProps> = ({
-  switchToTab: focusTab,
+  switchToTab,
   renameTab,
   closeTab,
   filename,
@@ -33,7 +33,7 @@ const FileNameTab: React.FC<FileNameTabProps> = ({
 
   return (
     <span
-      onClick={() => focusTab(index)}
+      onClick={() => !edit && switchToTab(index)}
       onMouseDown={e => e.button === 1 && !edit && closeTab(index)}
       onDoubleClick={showRename}
       className={[
@@ -49,13 +49,17 @@ const FileNameTab: React.FC<FileNameTabProps> = ({
           ref={inputRef}
           defaultValue={filename}
           onBlur={(e) => {
-            renameTab(index, e.target.value);
+            if (filename !== e.target.value) {
+              renameTab(index, e.target.value);
+            }
             setEdit(false);
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault();
-              renameTab(index, e.currentTarget.value);
+              if (filename !== e.currentTarget.value) {
+                renameTab(index, e.currentTarget.value);
+              }
               setEdit(false);
             }
           }}

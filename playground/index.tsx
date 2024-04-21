@@ -15,6 +15,7 @@ const localStorageKey = 'tsx-browser-compiler-playground-sources';
 
 const Playground: React.FC = () => {
   const [sources, setSources] = React.useState<[string, string][]>(defaultCodeSet);
+  const [loading, setLoading] = React.useState(false);
   const [layout, setLayout] = React.useState('horizontal');
   const [displayedChildren, setDisplayedChildren] = React.useState<React.ReactNode>(null);
   const [displayedCompiled, setDisplayedCompiled] = React.useState<[string, string][]>([]);
@@ -28,6 +29,10 @@ const Playground: React.FC = () => {
       } catch { }
     }
   }, []);
+
+  React.useEffect(() => {
+    setLoading(true);
+  }, [sources]);
 
   useDebouncedEffect(async() => {
     const { component, compiled, errors, cleanup } = await asyncTsxToElement({
@@ -50,7 +55,6 @@ const Playground: React.FC = () => {
                 },
                 (err: Error, result: { css: string }) => {
                   if (err) {
-                    err.message = `${meta.filename}: ${err.message}`;
                     callback(err, '', meta);
                   } else {
                     callback(null, result.css, meta);
@@ -71,16 +75,23 @@ const Playground: React.FC = () => {
       setDisplayedErrors(errors);
     }
     localStorage.setItem(localStorageKey, JSON.stringify(sources));
+    setLoading(false);
 
     return cleanup;
   }, [sources], 1000);
+
+  const resetDemo = () => {
+    if (confirm('Are you sure to reset the demo?\nThis will clear all your changes.')) {
+      setSources(defaultCodeSet);
+    }
+  };
 
   return (
     <div className="app">
       <div className="controls">
         <h1>TSX Browser Compiler</h1>
         <div>
-          <button onClick={() => setSources(defaultCodeSet)}>Reset demo</button>
+          <button onClick={resetDemo}>Reset demo</button>
           <label htmlFor="horizontal" className={layout === 'horizontal' ? 'checked' : ''}>
             <input type="radio"
               name="layout"
@@ -111,6 +122,7 @@ const Playground: React.FC = () => {
           className="playground-compile-result"
           result={displayedCompiled}
           errors={displayedErrors}
+          loading={loading}
         />
         <Previewer className="playground-previewer">
           {displayedChildren}
