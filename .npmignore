@@ -1,0 +1,13 @@
+.cache/
+.github/
+playground/
+src/
+.editorconfig
+.eslintrc.js
+.gitignore
+.npmignore
+.stylelintrc.js
+.swcrc
+playground-screenshot.png
+rollup.*
+tsconfig.*
