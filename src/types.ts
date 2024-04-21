@@ -20,7 +20,7 @@ export type LoaderCallback = (err: Error | null, content: string, meta: LoaderMe
 
 export interface LoaderFn {
   (content: string, meta: LoaderMeta, cb: LoaderCallback): void;
-  pitch?: (content: string, meta: LoaderMeta, cb: LoaderCallback) => void;
+  pitch?: (content: string, meta: LoaderMeta) => string;
 }
 
 export interface ModuleRule {

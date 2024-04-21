@@ -8,6 +8,8 @@ import { defaultCodeSet } from './configs';
 import Editor from './components/editor';
 import Previewer from './components/previewer';
 import useDebouncedEffect from './hooks/use-debounced-effect';
+import BuildTimeMeasurementLoader from './loaders/build-time-measurement-loader';
+import LessLoader from './loaders/less-loader';
 
 import './index.less';
 
@@ -53,21 +55,7 @@ const Playground: React.FC = () => {
       rules: [
         {
           test: /\.less$/,
-          use: [
-            (content, meta, callback) => {
-              (window as any).less.render(
-                content,
-                { filename: meta.filename },
-                (err: Error, result: { css: string }) => {
-                  if (err) {
-                    callback(err, '', meta);
-                  } else {
-                    callback(null, result.css, meta);
-                  }
-                },
-              );
-            },
-          ],
+          use: [BuildTimeMeasurementLoader, LessLoader],
         },
       ],
     });

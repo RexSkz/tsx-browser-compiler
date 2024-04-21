@@ -11,7 +11,8 @@
     "lint:eslint": "cross-env eslint --ext .ts,.tsx . --quiet",
     "lint:stylelint": "cross-env stylelint '**/*.{css,less}' --fix",
     "build": "cross-env rollup -c",
-    "build:pages": "cross-env NODE_ENV=production BASEDIR=docs rollup -c rollup.config.pages.ts"
+    "build:pages": "cross-env NODE_ENV=production BASEDIR=docs rollup -c rollup.config.pages.ts",
+    "prepublish": "cross-env pnpm build"
   },
   "repository": {
     "type": "git",

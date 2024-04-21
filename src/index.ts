@@ -16,6 +16,7 @@ const errNoCode = new Error('No code emitted.');
 const ignoredCode = [
   2307,
   6054,
+  7016,
   7026,
 ];
 

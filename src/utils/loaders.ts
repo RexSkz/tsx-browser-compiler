@@ -7,13 +7,13 @@ const jsRe = /\.m?[jt]sx?$/i;
 const jsonRe = /\.json$/i;
 
 const enforceOrderMap = {
-  pre: -1,
+  pre: 1,
   default: 0,
-  post: 1,
+  post: -1,
 };
 
 const normalizeRules = (rules: ModuleRule[]) => {
-  const normalizedRules = rules.map(rule => ({
+  const normalizedRules = rules.map((rule, index) => ({
     test: rule.test instanceof RegExp ? rule.test : new RegExp(rule.test),
     use: rule.use.map(loader => {
       if (typeof loader === 'function') {
@@ -27,9 +27,15 @@ const normalizeRules = (rules: ModuleRule[]) => {
         options: loader.options || {},
       };
     }),
-    enforce: 'default',
+    enforce: rule.enforce || 'default',
+    _originalOrder: index,
   }));
-  normalizedRules.sort((a, b) => enforceOrderMap[a.enforce] - enforceOrderMap[b.enforce]);
+  normalizedRules.sort((a, b) => {
+    if (a.enforce === b.enforce) {
+      return a._originalOrder - b._originalOrder;
+    }
+    return enforceOrderMap[a.enforce] - enforceOrderMap[b.enforce];
+  });
   return normalizedRules;
 };
 
@@ -39,28 +45,31 @@ const applyRules = (rules: ModuleRule[], filename: string, content: string): {
 } => {
   let result = content;
   let error: Error | null = null;
+  const currentMeta = { filename, options: {} };
   for (const rule of normalizeRules(rules)) {
     if (rule.test.test(filename)) {
       // forward: pitch
-      for (let i = 0; i < rule.use.length; i++) {
-        const { loader, options } = rule.use[i];
+      let pitchLoaderIndex = 0;
+      for (; pitchLoaderIndex < rule.use.length; pitchLoaderIndex++) {
+        const { loader, options } = rule.use[pitchLoaderIndex];
+        currentMeta.options = options;
         if (loader.pitch) {
-          loader.pitch(result, { filename, options }, (err, newContent) => {
-            if (err) {
-              error = err;
-              return;
+          try {
+            const newContent = loader.pitch(result, currentMeta);
+            if (typeof newContent !== 'undefined') {
+              result = newContent;
+              break;
             }
-            result = newContent;
-          });
-          if (error) {
-            return { content: result, error };
+          } catch (e) {
+            return { content: result, error: e };
           }
         }
       }
       // backward: normal
-      for (let i = rule.use.length - 1; i >= 0; i--) {
+      for (let i = Math.min(pitchLoaderIndex, rule.use.length - 1); i >= 0; i--) {
         const { loader, options } = rule.use[i];
-        loader(result, { filename, options }, (err, newContent) => {
+        currentMeta.options = options;
+        loader(result, currentMeta, (err, newContent) => {
           if (err) {
             error = err;
             return;
@@ -98,9 +107,6 @@ export const parseSources = (
       parsedSources[filename] = content;
       continue;
     }
-    // Types for non-ts files, see:
-    // https://www.typescriptlang.org/tsconfig#allowArbitraryExtensions
-    parsedSources[`${filename}.d.ts`] = `declare const result: any;\nexport default result;`;
     if (jsonRe.test(filename)) {
       parsedSources[`${filename}.js`] = `export default ${content};`;
     } else if (cssRe.test(filename)) {
@@ -108,9 +114,9 @@ export const parseSources = (
 const s = \`${content.trim()}\`;
 let el = document.head.querySelector('style[data-tsx-browser-compiler-filename="${filename}"]');
 if (!el) {
-el = document.createElement('style');
-el.setAttribute('data-tsx-browser-compiler-filename', '${filename}');
-document.head.appendChild(el);
+  el = document.createElement('style');
+  el.setAttribute('data-tsx-browser-compiler-filename', '${filename}');
+  document.head.appendChild(el);
 }
 el.textContent = s;
       `;
