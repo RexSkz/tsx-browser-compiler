@@ -36,7 +36,7 @@ export interface Config {
   sources: Record<string, string>;
   entryFile?: string;
   resolve?: Partial<ResolveConfig>;
-  requireFn?: (path: string) => any;
+  requireFn?: (absolutePath: string) => any;
   rules?: ModuleRule[];
   displayName?: string;
 };

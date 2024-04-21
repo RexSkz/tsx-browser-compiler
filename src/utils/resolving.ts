@@ -8,12 +8,12 @@ import { normalizePath } from './normalize-path';
 
 export const mergeResolve = (resolve: Partial<ResolveConfig> | undefined = {}) => {
   const mergedResolve: ResolveConfig = {
-    extensions: ['.js', ...(resolve.extensions || [])],
+    ...resolve,
+    extensions: resolve.extensions || ['.js'],
     externals: {
       ...resolve.externals,
     },
     cdnPrefix: 'https://unpkg.com',
-    ...resolve,
   };
   return mergedResolve;
 };

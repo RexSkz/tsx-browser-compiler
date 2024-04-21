@@ -84,7 +84,9 @@ export const asyncTsxToElement = async({
     const mergedResolve = mergeResolve(resolve);
     await loadExternalsToClosureMap(mergedResolve, closureMap);
     const result = closure(createRequireFn(closureMap, requireFn, mergedResolve));
-    result.default.displayName = displayName;
+    if (!result.default.displayName) {
+      result.default.displayName = displayName;
+    }
     return {
       component: React.createElement(result.default),
       defaultExport: result.default,
