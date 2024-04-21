@@ -8,8 +8,9 @@
   "scripts": {
     "start": "cross-env rollup -c rollup.config.pages.ts -w",
     "dev": "cross-env pnpm start",
-    "lint:eslint": "eslint --ext .ts,.tsx . --quiet",
-    "lint:stylelint": "stylelint '**/*.{css,less}' --fix",
+    "lint:eslint": "cross-env eslint --ext .ts,.tsx . --quiet",
+    "lint:stylelint": "cross-env stylelint '**/*.{css,less}' --fix",
+    "build": "cross-env rollup -c",
     "build:pages": "cross-env NODE_ENV=production BASEDIR=docs rollup -c rollup.config.pages.ts"
   },
   "repository": {

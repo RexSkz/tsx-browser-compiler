@@ -9,6 +9,9 @@ import { parseSources } from './utils/loaders';
 
 export type * from './types';
 
+declare const __VERSION__: string;
+export const VERSION = __VERSION__;
+
 const errNoCode = new Error('No code emitted.');
 const ignoredCode = [
   2307,

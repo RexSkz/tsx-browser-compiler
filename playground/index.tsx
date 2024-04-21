@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-import { asyncTsxToElement } from '../src';
+import { asyncTsxToElement, VERSION } from '../src';
 
 import CompileResult from './components/compile-result';
 import { defaultCodeSet } from './configs';
@@ -13,10 +13,18 @@ import './index.less';
 
 const localStorageKey = 'tsx-browser-compiler-playground-sources';
 
+const IconSplit = (props: { className?: string; style?: React.CSSProperties }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor" {...props}>
+    <rect x="15" y="4" width="2" height="24" />
+    <path d="M10,7V25H4V7h6m0-2H4A2,2,0,0,0,2,7V25a2,2,0,0,0,2,2h6a2,2,0,0,0,2-2V7a2,2,0,0,0-2-2Z" />
+    <path d="M28,7V25H22V7h6m0-2H22a2,2,0,0,0-2,2V25a2,2,0,0,0,2,2h6a2,2,0,0,0,2-2V7a2,2,0,0,0-2-2Z" />
+  </svg>
+);
+
 const Playground: React.FC = () => {
   const [sources, setSources] = React.useState<[string, string][]>(defaultCodeSet);
   const [loading, setLoading] = React.useState(false);
-  const [layout, setLayout] = React.useState('horizontal');
+  const [layout, setLayout] = React.useState(window.innerWidth < 960 ? 'vertical' : 'horizontal');
   const [displayedChildren, setDisplayedChildren] = React.useState<React.ReactNode>(null);
   const [displayedCompiled, setDisplayedCompiled] = React.useState<[string, string][]>([]);
   const [displayedErrors, setDisplayedErrors] = React.useState<Error[]>([]);
@@ -49,10 +57,7 @@ const Playground: React.FC = () => {
             (content, meta, callback) => {
               (window as any).less.render(
                 content,
-                {
-                  filename: meta.filename,
-                  minimize: true,
-                },
+                { filename: meta.filename },
                 (err: Error, result: { css: string }) => {
                   if (err) {
                     callback(err, '', meta);
@@ -89,26 +94,33 @@ const Playground: React.FC = () => {
   return (
     <div className="app">
       <div className="controls">
-        <h1>TSX Browser Compiler</h1>
-        <div>
+        <h1>
+          TSX Browser Compiler
+          <small>v{VERSION}</small>
+        </h1>
+        <div className="controls-buttons">
           <button onClick={resetDemo}>Reset demo</button>
           <label htmlFor="horizontal" className={layout === 'horizontal' ? 'checked' : ''}>
+            <IconSplit className="icon icon-split-horizontal" />
             <input type="radio"
               name="layout"
               id="horizontal"
-              defaultChecked
+              checked={layout === 'horizontal'}
               onChange={() => setLayout('horizontal')}
             />
-            <span>Horizontal</span>
           </label>
           <label htmlFor="vertical" className={layout === 'vertical' ? 'checked' : ''}>
+            <IconSplit
+              className="icon icon-split-vertical"
+              style={{ transform: 'rotate(90deg)' }}
+            />
             <input
               type="radio"
               id="vertical"
               name="layout"
+              checked={layout === 'vertical'}
               onChange={() => setLayout('vertical')}
             />
-            <span>Vertical</span>
           </label>
         </div>
       </div>

@@ -13,6 +13,14 @@ import ts from 'typescript';
 import packageJson from './package.json';
 
 const BASEDIR = process.env.BASEDIR || '.cache';
+const reactFile = process.env.NODE_ENV === 'production' ? 'production.min' : 'development';
+
+const globals = {
+  typescript: 'ts',
+  react: 'React',
+  'react-dom': 'ReactDOM',
+  'react-dom/client': 'ReactDOM',
+};
 
 const plugins = [
   less({
@@ -27,6 +35,7 @@ const plugins = [
 <head>
   <title>TSX Browser Compiler Playground</title>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
 <body>
   <script>
@@ -38,7 +47,9 @@ const plugins = [
     });
   </script>
   <div id="root"></div>
-  <script src="https://www.unpkg.com/typescript@${ts.version}/lib/typescript.js"></script>
+  <script src="https://unpkg.com/react@18.2.0/umd/react.${reactFile}.js"></script>
+  <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.${reactFile}.js"></script>
+  <script src="https://unpkg.com/typescript@${ts.version}/lib/typescript.js"></script>
   <script src="https://unpkg.com/prettier@3.2.5/standalone.js"></script>
   <script src="https://unpkg.com/prettier@3.2.5/plugins/estree.js"></script>
   <script src="https://unpkg.com/prettier@3.2.5/plugins/babel.js"></script>
@@ -64,21 +75,8 @@ const plugins = [
   swc({
     minify: process.env.NODE_ENV === 'production',
     sourceMaps: process.env.NODE_ENV !== 'production',
-    jsc: {
-      parser: {
-        syntax: 'typescript',
-      },
-      transform: {
-        react: { runtime: 'automatic' },
-      },
-      target: 'es2020',
-      loose: true,
-      keepClassNames: true,
-    },
   }),
-  externalGlobals({
-    typescript: 'ts',
-  }),
+  externalGlobals(globals),
 ];
 
 if (process.env.NODE_ENV !== 'production') {
@@ -102,11 +100,9 @@ export default {
     file: `${BASEDIR}/index.js`,
     name: 'Playground',
     format: 'umd',
-    globals: {
-      react: 'React',
-      'react-dom': 'ReactDOM',
-    },
+    globals,
     sourcemap: process.env.NODE_ENV !== 'production',
   },
+  external: Object.keys(globals),
   plugins,
 };

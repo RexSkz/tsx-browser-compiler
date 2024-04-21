@@ -82,71 +82,84 @@ a {
       font-weight: 500;
       line-height: var(--playground-controls-height);
 
+      small {
+        margin-left: 8px;
+        font-size: 12px;
+        font-weight: normal;
+      }
+
       & + div {
         margin: 0 8px 0 auto;
       }
     }
 
-    button {
-      box-sizing: border-box;
-      margin-right: 8px;
-      padding: 0 4px;
-      height: 20px;
-      background: var(--playground-button-background);
-      border-radius: 4px;
-      border: 1px solid var(--playground-divider-color);
-      color: var(--playground-text-color);
-      font-size: 12px;
-      vertical-align: middle;
-      cursor: pointer;
-
-      &:active {
-        background: var(--playground-button-hover-background);
-      }
-    }
-
-    label {
-      position: relative;
-      display: inline-flex;
+    &-buttons {
+      display: flex;
       align-items: center;
-      padding: 4px 8px;
-      font-size: 12px;
 
-      input {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        border-radius: 4px;
-        margin: 0 4px 0 0;
-        appearance: none;
+      button {
+        box-sizing: border-box;
+        margin-right: 8px;
+        padding: 4px 4px;
         background: var(--playground-button-background);
+        border-radius: 4px;
+        border: 1px solid var(--playground-divider-color);
+        color: var(--playground-text-color);
+        font-size: 12px;
+        vertical-align: middle;
         cursor: pointer;
 
-        & + span {
-          z-index: 1;
-          cursor: pointer;
+        &:active {
+          background: var(--playground-button-hover-background);
         }
       }
 
-      & + label input {
-        border-left: none;
-      }
+      label {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 8px;
+        font-size: 12px;
 
-      &.checked input {
-        outline: 2px solid var(--playground-tabs-tab-active-border-color);
-        z-index: 1;
-      }
+        .icon {
+          z-index: 2;
+          pointer-events: none;
+        }
 
-      &:first-of-type input {
-        border-bottom-right-radius: 0;
-        border-top-right-radius: 0;
-      }
+        input {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: var(--playground-button-background);
+          border: 1px solid var(--playground-divider-color);
+          border-radius: 4px;
+          margin: 0 4px 0 0;
+          appearance: none;
+          cursor: pointer;
+          outline: 2px solid transparent;
+          transition: outline-color 0.2s;
+        }
 
-      &:last-of-type input {
-        border-bottom-left-radius: 0;
-        border-top-left-radius: 0;
+        & + label input {
+          border-left: none;
+        }
+
+        &.checked input {
+          outline-color: var(--playground-tabs-tab-active-border-color);
+          z-index: 1;
+        }
+
+        &:first-of-type input {
+          border-bottom-right-radius: 0;
+          border-top-right-radius: 0;
+        }
+
+        &:last-of-type input {
+          border-bottom-left-radius: 0;
+          border-top-left-radius: 0;
+        }
       }
     }
   }
@@ -218,15 +231,20 @@ a {
           background: var(--playground-code-background);
         }
 
-        &-active:before {
+        &:before {
           position: absolute;
           top: 0;
           right: 0;
           left: 0;
           display: block;
           height: 2px;
-          background: var(--playground-tabs-tab-active-border-color);
+          background: transparent;
+          transition: background 0.2s;
           content: '';
+        }
+
+        &-active:before {
+          background: var(--playground-tabs-tab-active-border-color);
         }
 
         input {
@@ -400,4 +418,13 @@ a {
       color: red;
     }
   }
+}
+
+.icon {
+  --icon-size: 16px;
+
+  display: inline-block;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  color: var(--playground-text-color);
 }
