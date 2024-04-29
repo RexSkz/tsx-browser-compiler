@@ -17,6 +17,7 @@ jobs:
           npm install -g pnpm@8
           pnpm i
           pnpm build:pages
+          echo "tsx-browser-compiler.js.org" > docs/CNAME
           git add docs -f
           git commit -m Pages
           git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
