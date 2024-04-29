@@ -36,6 +36,13 @@ const plugins = [
   <title>TSX Browser Compiler Playground</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QZVF1HM8N5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-QZVF1HM8N5');
+  </script>
 </head>
 <body>
   <script>
