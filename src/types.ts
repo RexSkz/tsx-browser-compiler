@@ -29,7 +29,7 @@ export interface ModuleRule {
     loader: LoaderFn;
     options?: Record<string, unknown>;
   })[];
-  enforce?: 'pre' | 'post';
+  enforce?: 'pre' | 'post' | 'default';
 }
 
 export interface Config {

@@ -8,6 +8,7 @@
     "esModuleInterop": true,
     "jsx": "react",
     "moduleResolution": "node",
+    "noImplicitAny": true,
     "outDir": "typings",
     "resolveJsonModule": true,
     "sourceMap": true,

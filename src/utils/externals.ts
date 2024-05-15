@@ -16,8 +16,8 @@ export const loadExternalsToClosureMap = async(
   for (const [name, value] of Object.entries(resolve.externals)) {
     if (/^https?:\/\//.test(value)) {
       closureMap[name] = await loadUMDModule(value);
-    } else if (window[value]) {
-      closureMap[name] = () => window[value];
+    } else if ((window as any)[value]) {
+      closureMap[name] = () => (window as any)[value];
     } else {
       // CDN will read the "brower" field in `package.json`
       // and return the UMD bundle
